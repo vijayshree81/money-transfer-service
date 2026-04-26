@@ -3,7 +3,7 @@ package com.mybank.moneytransfer.error;
 import org.springframework.http.HttpStatus;
 
 public sealed class BusinessException extends RuntimeException
-		permits AccountNotFoundException, OverDraftException {
+		permits AccountNotFoundException, OverDraftException, DuplicateAccountException {
 
 	private final HttpStatus httpStatus;
 

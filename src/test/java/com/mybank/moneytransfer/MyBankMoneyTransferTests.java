@@ -42,6 +42,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.client.ExpectedCount;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
@@ -81,6 +82,8 @@ class MyBankMoneyTransferTests {
     FundTransferLogService fundTransferLogService;
     @Autowired
     MockMvc mockMvc;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
     private MoneyTransactionService moneyTxnService;
     @Autowired
     private RestTemplate restTemplate;
@@ -94,7 +97,9 @@ class MyBankMoneyTransferTests {
     @BeforeEach
     void setup() {
         moneyTxnService = new MoneyTransactionService(accountRepository, fundTransferLogService, restTemplate);
-        accountRepository.deleteAll();
+        jdbcTemplate.execute("DELETE FROM FUND_TRANSFER_LOG");
+        jdbcTemplate.execute("DELETE FROM ACCOUNT_AUDIT_LOG");
+        jdbcTemplate.execute("DELETE FROM ACCOUNT");
         testData = getTestData();
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }
@@ -171,8 +176,31 @@ class MyBankMoneyTransferTests {
                     .andExpect(jsonPath("$.message").exists());
         }
 
+
         @Test
         @Order(4)
+        @DisplayName("1.3 Given account ID exist, when POST to /account, then return 409")
+        void shouldRejectAccountWhenAccountExist() throws Exception {
+            // Given — create the account first
+            var acct1Exists = testData.get("acct1Exists");
+            mockMvc.perform(post(ACCT_BASE_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(acct1Exists)))
+                    .andExpect(status().isCreated());
+
+            // When — attempt to create the same account again
+            var result = mockMvc.perform(post(ACCT_BASE_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(acct1Exists)))
+                    .andDo(print());
+
+            // Then
+            result.andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").exists());
+        }
+
+        @Test
+        @Order(5)
         @DisplayName("1.4 Given negative balance, when POST to /account, then return 400 with error message")
         void shouldRejectAccountWhenBalanceIsNegative() throws Exception {
             // Given
@@ -546,7 +574,8 @@ class MyBankMoneyTransferTests {
         return Map.of(
                 "account1", new Account("323434322", "C", "A", now, new BigDecimal("15500")),
                 "account2", new Account("654444322", "S", "A", now, new BigDecimal("10000")),
-                "invalidAcct1", new Account("121211", "S", "A", now, new BigDecimal("12000"))
+                "invalidAcct1", new Account("121211", "S", "A", now, new BigDecimal("12000")),
+                "acct1Exists", new Account("323434322", "C", "A", now, new BigDecimal("12000"))
         );
     }
 }

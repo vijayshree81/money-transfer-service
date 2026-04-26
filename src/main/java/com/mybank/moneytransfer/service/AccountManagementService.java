@@ -1,5 +1,6 @@
 package com.mybank.moneytransfer.service;
 
+import com.mybank.moneytransfer.error.DuplicateAccountException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,9 @@ public class AccountManagementService {
 
 	@Transactional
 	public Account createAccount(final Account account) {
+		if(!accountRepository.findByAccountId(account.getAccountId()).isEmpty()) {
+			throw new DuplicateAccountException("Account with id:" + account.getAccountId() + " already exist.");
+		}
 		this.accountRepository.save(account);
 		accountAuditLogService.save(new AccountAuditLog(
 				account.getAccountId(), "CREATE", "SUCCESS",
