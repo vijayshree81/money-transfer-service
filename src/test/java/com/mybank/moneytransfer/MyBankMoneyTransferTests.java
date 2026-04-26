@@ -238,7 +238,7 @@ class MyBankMoneyTransferTests {
 
             // When
             var actualRecord = objectMapper.readValue(
-                    mockMvc.perform(get(ACCT_BASE_URL + "/" + createdAccount.getAccountId() + "/info"))
+                    mockMvc.perform(get(ACCT_BASE_URL + "/info").header("accountId", createdAccount.getAccountId()))
                             .andExpect(status().isOk())
                             .andReturn().getResponse().getContentAsString(),
                     Account.class);
@@ -249,13 +249,13 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(2)
-        @DisplayName("2.2 Given non-existent account ID, when GET /account/{id}/info, then return 404 Not Found")
+        @DisplayName("2.2 Given non-existent account ID, when GET /account/info with header, then return 404 Not Found")
         void shouldReturn404WhenIdDoesNotExist() throws Exception {
             // Given
             var nonExistentAccountId = "X0123531X";
 
             // When
-            var result = mockMvc.perform(get(ACCT_BASE_URL + "/" + nonExistentAccountId + "/info"));
+            var result = mockMvc.perform(get(ACCT_BASE_URL + "/info").header("accountId", nonExistentAccountId));
 
             // Then
             result.andExpect(status().isNotFound())

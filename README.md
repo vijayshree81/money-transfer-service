@@ -29,8 +29,8 @@ Design and implement a REST API for transferring money between accounts.
 | Method | Endpoint | Description | Response |
 |--------|----------|-------------|----------|
 | POST | `/mybank/v1/account` | Create a new account | 201 Created |
-| GET | `/mybank/v1/account/{accountId}/info` | Get account details | 200 OK / 404 Not Found |
-| GET | `/mybank/v1/account/{accountId}/balance` | Get account balance | 200 OK / 400 Bad Request |
+| GET | `/mybank/v1/account/info` | Get account details (header: `accountId`) | 200 OK / 404 Not Found |
+| GET | `/mybank/v1/account/balance` | Get account balance (header: `accountId`) | 200 OK / 400 Bad Request |
 
 ### Fund Transfer
 
@@ -121,10 +121,10 @@ mvn clean test
 
 ## Test Structure
 
-19 BDD-style tests organized as a sequential business flow:
+20 BDD-style tests organized as a sequential business flow:
 
 ```
-1. Account Creation        (4 tests) — valid account, null balance default, invalid ID, negative balance
+1. Account Creation        (5 tests) — valid account, null balance default, invalid ID, duplicate account, negative balance
 2. Account Retrieval       (2 tests) — existing account, non-existent account
 3. Unsupported Operations  (1 test)  — PATCH/DELETE rejected
 4. Fund Transfer           (8 tests) — service-layer transfer, API transfer, same-account, insufficient balance,
@@ -199,10 +199,18 @@ curl -X POST http://localhost:8080/mybank/v1/account \
   -d '{"accountId":"342233242","type":"C","status":"A","balance":15000}'
 ```
 
+**Get Account Info**
+
+```bash
+curl http://localhost:8080/mybank/v1/account/info \
+  -H 'accountId: 342233241'
+```
+
 **Check Balance**
 
 ```bash
-curl http://localhost:8080/mybank/v1/account/342233241/balance
+curl http://localhost:8080/mybank/v1/account/balance \
+  -H 'accountId: 342233241'
 ```
 
 **Transfer Funds**

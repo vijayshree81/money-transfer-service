@@ -7,12 +7,7 @@ import java.util.NoSuchElementException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mybank.moneytransfer.dto.BalanceResult;
 import com.mybank.moneytransfer.error.AccountNotFoundException;
@@ -33,9 +28,9 @@ public class AccountManagementController {
 		this.accountManagementService = accountManagementService;
 	}
 
-	@GetMapping("/{accountId}/info")
+	@GetMapping("/info")
 	@Operation(summary = "API to Get Account Info")
-	public Account getAccount(@PathVariable("accountId") final String accountId) {
+	public Account getAccount(@RequestHeader("accountId") final String accountId) {
 		try {
 			return this.accountManagementService.findByAccountId(accountId);
 		} catch (final NoSuchElementException e) {
@@ -63,9 +58,9 @@ public class AccountManagementController {
 		return new ResponseEntity<>(account, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/{accountId}/balance")
+	@GetMapping("/balance")
 	@Operation(summary = "API to get Account Balance")
-	public ResponseEntity<?> checkBalance(@PathVariable("accountId") String accountId) {
+	public ResponseEntity<?> checkBalance(@RequestHeader("accountId") String accountId) {
 		if (accountId == null || accountId.length() != 9) {
 			var error = new ExceptionResponse(new Date(), "Invalid account ID:" + accountId,
 					"uri=/mybank/v1/account/" + accountId + "/balance", HttpStatus.BAD_REQUEST.getReasonPhrase());
