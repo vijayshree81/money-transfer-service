@@ -1,0 +1,6 @@
+/target/
+/.project
+/.classpath
+/.factorypath
+/.settings
+/mcp.log
