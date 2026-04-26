@@ -48,7 +48,7 @@ public class MoneyTransactionController {
 		var transactionId = UUID.randomUUID().toString();
 		try {
 			var fundTxnLog = moneyTxnService.transferMoney(request, transactionId);
-			var balanceAfterTransfer = request.getBalance()
+			var balanceAfterTransfer = request.includeBalance()
 					? moneyTxnService.checkBalance(request.accountFromId())
 					: null;
 			var result = new TransferResult(

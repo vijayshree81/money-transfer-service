@@ -22,7 +22,7 @@ public record TransferRequest(
 		BigDecimal amount,
 
 		@Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-		boolean getBalance
+		boolean includeBalance
 ) {
 	public TransferRequest(String requestId, String accountFromId, String accountToId, BigDecimal amount) {
 		this(requestId, accountFromId, accountToId, amount, false);

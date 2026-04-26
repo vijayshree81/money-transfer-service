@@ -179,7 +179,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(4)
-        @DisplayName("1.3 Given account ID exist, when POST to /account, then return 409")
+        @DisplayName("1.4 Given account ID exist, when POST to /account, then return 409")
         void shouldRejectAccountWhenAccountExist() throws Exception {
             // Given — create the account first
             var acct1Exists = testData.get("acct1Exists");
@@ -201,7 +201,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(5)
-        @DisplayName("1.4 Given negative balance, when POST to /account, then return 400 with error message")
+        @DisplayName("1.5 Given negative balance, when POST to /account, then return 400 with error message")
         void shouldRejectAccountWhenBalanceIsNegative() throws Exception {
             // Given
             var now = new Timestamp(GregorianCalendar.getInstance().getTimeInMillis());
@@ -320,7 +320,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(2)
-        @DisplayName("4.2 Given two accounts, when POST to /transaction with getBalance=true, then return 202 with updated balance")
+        @DisplayName("4.2 Given two accounts, when POST to /transaction with includeBalance=true, then return 202 with updated balance")
         void shouldTransferMoneyViaApi() throws Exception {
             // Given
             var acct1 = testData.get("account1");

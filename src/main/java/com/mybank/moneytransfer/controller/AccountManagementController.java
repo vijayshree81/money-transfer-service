@@ -25,11 +25,11 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @RequestMapping("/mybank/v1/account")
 @Tag(name = "AccountManagement", description = "AccountManagement APIs")
-public class AccountManagmentController {
+public class AccountManagementController {
 
 	private final AccountManagementService accountManagementService;
 
-	public AccountManagmentController(AccountManagementService accountManagementService) {
+	public AccountManagementController(AccountManagementService accountManagementService) {
 		this.accountManagementService = accountManagementService;
 	}
 
