@@ -1,6 +1,22 @@
-/target/
-/.project
-/.classpath
-/.factorypath
-/.settings
-/mcp.log
+# Build output
+target/
+
+# Eclipse
+.project
+.classpath
+.factorypath
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+
+# Logs
+mcp.log
+*.log
