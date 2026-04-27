@@ -2,6 +2,7 @@ package com.mybank.moneytransfer.controller;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,6 +57,26 @@ public class AccountManagementController {
 		}
 		this.accountManagementService.createAccount(account);
 		return new ResponseEntity<>(account, HttpStatus.CREATED);
+	}
+
+	@PostMapping("/balance")
+	@Operation(summary = "API to Deposit Balance")
+	public ResponseEntity<?> depositBalance(
+			@RequestHeader("accountId") String accountId,
+			@RequestBody Map<String, BigDecimal> body) {
+		if (accountId == null || accountId.length() != 9) {
+			var error = new ExceptionResponse(new Date(), "Invalid account ID:" + accountId,
+					"uri=/mybank/v1/account/balance", HttpStatus.BAD_REQUEST.getReasonPhrase());
+			return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+		}
+		var amount = body.get("amount");
+		if (amount == null) {
+			var error = new ExceptionResponse(new Date(), "Amount is required",
+					"uri=/mybank/v1/account/balance", HttpStatus.BAD_REQUEST.getReasonPhrase());
+			return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+		}
+		var account = accountManagementService.depositBalance(accountId, amount);
+		return ResponseEntity.ok(new BalanceResult(accountId, null, account.getBalance()));
 	}
 
 	@GetMapping("/balance")

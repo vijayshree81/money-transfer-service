@@ -30,6 +30,7 @@ Design and implement a REST API for transferring money between accounts.
 |--------|----------|-------------|----------|
 | POST | `/mybank/v1/account` | Create a new account | 201 Created |
 | GET | `/mybank/v1/account/info` | Get account details (header: `accountId`) | 200 OK / 404 Not Found |
+| POST | `/mybank/v1/account/balance` | Deposit balance (header: `accountId`, body: `{"amount": 5000}`) | 200 OK / 400 Bad Request |
 | GET | `/mybank/v1/account/balance` | Get account balance (header: `accountId`) | 200 OK / 400 Bad Request |
 
 ### Fund Transfer
@@ -121,16 +122,17 @@ mvn clean test
 
 ## Test Structure
 
-20 BDD-style tests organized as a sequential business flow:
+22 BDD-style tests organized as a sequential business flow:
 
 ```
 1. Account Creation        (5 tests) — valid account, null balance default, invalid ID, duplicate account, negative balance
 2. Account Retrieval       (2 tests) — existing account, non-existent account
-3. Unsupported Operations  (1 test)  — PATCH/DELETE rejected
-4. Fund Transfer           (8 tests) — service-layer transfer, API transfer, same-account, insufficient balance,
+3. Deposit Balance         (2 tests) — successful deposit, negative amount rejected
+4. Unsupported Operations  (1 test)  — PATCH/DELETE rejected
+5. Fund Transfer           (8 tests) — service-layer transfer, API transfer, same-account, insufficient balance,
                                         overdraft, zero amount, missing account, same-account via API
-5. Account Audit Logs      (3 tests) — empty logs, after creation, filtered by account ID
-6. Transaction Audit Logs  (1 test)  — after successful transfer
+6. Account Audit Logs      (3 tests) — empty logs, after creation, filtered by account ID
+7. Transaction Audit Logs  (1 test)  — after successful transfer
 ```
 
 ## Sample Data
@@ -204,6 +206,15 @@ curl -X POST http://localhost:8080/mybank/v1/account \
 ```bash
 curl http://localhost:8080/mybank/v1/account/info \
   -H 'accountId: 342233241'
+```
+
+**Deposit Balance**
+
+```bash
+curl -X POST http://localhost:8080/mybank/v1/account/balance \
+  -H 'accountId: 342233241' \
+  -H 'Content-Type: application/json' \
+  -d '{"amount": 5000}'
 ```
 
 **Check Balance**

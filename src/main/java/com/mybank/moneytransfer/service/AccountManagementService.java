@@ -4,7 +4,10 @@ import com.mybank.moneytransfer.error.DuplicateAccountException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 import com.mybank.moneytransfer.error.AccountNotFoundException;
+import com.mybank.moneytransfer.error.OverDraftException;
 import com.mybank.moneytransfer.entity.Account;
 import com.mybank.moneytransfer.entity.AccountAuditLog;
 import com.mybank.moneytransfer.repository.AccountRepository;
@@ -33,6 +36,19 @@ public class AccountManagementService {
 
 	public void save(final Account account) {
 		this.accountRepository.save(account);
+	}
+
+	@Transactional
+	public Account depositBalance(String accountId, BigDecimal amount) {
+		var account = accountRepository.getAccountForUpdate(accountId)
+				.orElseThrow(() -> new AccountNotFoundException("Account with id:" + accountId + " does not exist."));
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new OverDraftException("Deposit amount must be greater than zero");
+		}
+		account.setBalance(account.getBalance().add(amount));
+		accountAuditLogService.save(new AccountAuditLog(
+				accountId, "DEPOSIT", "SUCCESS", "Deposited: " + amount));
+		return account;
 	}
 
 	@Transactional

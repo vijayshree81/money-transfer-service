@@ -265,12 +265,61 @@ class MyBankMoneyTransferTests {
     }
 
     // ───────────────────────────────────────────────────────────────
-    // 3. Unsupported Operations
+    // 3. Deposit Balance
     // ───────────────────────────────────────────────────────────────
 
     @Nested
     @Order(3)
-    @DisplayName("3. Unsupported Operations")
+    @DisplayName("3. Deposit Balance")
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    class DepositBalance {
+
+        @Test
+        @Order(1)
+        @DisplayName("3.1 Given existing account, when POST to /account/balance with amount, then return 200 with updated balance")
+        void shouldDepositBalanceSuccessfully() throws Exception {
+            // Given
+            var account = createAccountViaApi(getTestData().get("account1")); // balance: 15500
+            var depositAmount = new BigDecimal("5000");
+
+            // When
+            var result = mockMvc.perform(post(ACCT_BASE_URL + "/balance")
+                            .header("accountId", account.getAccountId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"amount\": 5000}"))
+                    .andDo(print());
+
+            // Then
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.finalBalance").value(20500.00));
+        }
+
+        @Test
+        @Order(2)
+        @DisplayName("3.2 Given existing account, when POST to /account/balance with negative amount, then return 400")
+        void shouldRejectNegativeDeposit() throws Exception {
+            // Given
+            var account = createAccountViaApi(getTestData().get("account1"));
+
+            // When
+            var result = mockMvc.perform(post(ACCT_BASE_URL + "/balance")
+                            .header("accountId", account.getAccountId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"amount\": -500}"))
+                    .andDo(print());
+
+            // Then
+            result.andExpect(status().isBadRequest());
+        }
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // 4. Unsupported Operations
+    // ───────────────────────────────────────────────────────────────
+
+    @Nested
+    @Order(4)
+    @DisplayName("4. Unsupported Operations")
     class UnsupportedOperations {
 
         @Test
@@ -289,18 +338,18 @@ class MyBankMoneyTransferTests {
     }
 
     // ───────────────────────────────────────────────────────────────
-    // 4. Fund Transfer
+    // 5. Fund Transfer
     // ───────────────────────────────────────────────────────────────
 
     @Nested
-    @Order(4)
-    @DisplayName("4. Fund Transfer")
+    @Order(5)
+    @DisplayName("5. Fund Transfer")
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class FundTransfer {
 
         @Test
         @Order(1)
-        @DisplayName("4.1 Given two accounts with sufficient balance, when transferMoney at service layer, then debit source and credit destination")
+        @DisplayName("5.1 Given two accounts with sufficient balance, when transferMoney at service layer, then debit source and credit destination")
         void shouldTransferMoneyBetweenAccountsAtServiceLayer() throws Exception {
             // Given
             var acctFrom = testData.get("account1");
@@ -320,7 +369,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(2)
-        @DisplayName("4.2 Given two accounts, when POST to /transaction with includeBalance=true, then return 202 with updated balance")
+        @DisplayName("5.2 Given two accounts, when POST to /transaction with includeBalance=true, then return 202 with updated balance")
         void shouldTransferMoneyViaApi() throws Exception {
             // Given
             var acct1 = testData.get("account1");
@@ -356,7 +405,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(3)
-        @DisplayName("4.3 Given same source and destination account, when transferMoney, then throw BusinessException")
+        @DisplayName("5.3 Given same source and destination account, when transferMoney, then throw BusinessException")
         void shouldRejectSameAccountTransfer() throws Exception {
             // Given
             var acct = testData.get("account1");
@@ -371,7 +420,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(4)
-        @DisplayName("4.4 Given insufficient balance, when transferMoney, then throw OverDraftException")
+        @DisplayName("5.4 Given insufficient balance, when transferMoney, then throw OverDraftException")
         void shouldRejectTransferWhenInsufficientBalance() throws Exception {
             // Given
             var acctFrom = testData.get("account1"); // balance: 15500
@@ -389,7 +438,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(5)
-        @DisplayName("4.5 Given insufficient balance, when POST to /transaction, then return 400 with overdraft message")
+        @DisplayName("5.5 Given insufficient balance, when POST to /transaction, then return 400 with overdraft message")
         void shouldReturn400WhenOverdraftViaApi() throws Exception {
             // Given
             var acct1 = testData.get("account1");
@@ -412,7 +461,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(6)
-        @DisplayName("4.6 Given zero transfer amount, when POST to /transaction, then return 400 validation error")
+        @DisplayName("5.6 Given zero transfer amount, when POST to /transaction, then return 400 validation error")
         void shouldRejectZeroAmountTransferViaApi() throws Exception {
             // Given
             var acct1 = testData.get("account1");
@@ -435,7 +484,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(7)
-        @DisplayName("4.7 Given non-existent source account, when POST to /transaction, then return 404")
+        @DisplayName("5.7 Given non-existent source account, when POST to /transaction, then return 404")
         void shouldReturn404WhenSourceAccountMissing() throws Exception {
             // Given
             var acct2 = testData.get("account2");
@@ -456,7 +505,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(8)
-        @DisplayName("4.8 Given same source and destination, when POST to /transaction, then return 400")
+        @DisplayName("5.8 Given same source and destination, when POST to /transaction, then return 400")
         void shouldReturn400WhenSameAccountViaApi() throws Exception {
             // Given
             var acct1 = testData.get("account1");
@@ -481,14 +530,14 @@ class MyBankMoneyTransferTests {
     // ───────────────────────────────────────────────────────────────
 
     @Nested
-    @Order(5)
-    @DisplayName("5. Account Audit Logs")
+    @Order(6)
+    @DisplayName("6. Account Audit Logs")
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class AccountAuditLogs {
 
         @Test
         @Order(1)
-        @DisplayName("5.1 Given no accounts created, when GET /audit/account/logs, then return empty array")
+        @DisplayName("6.1 Given no accounts created, when GET /audit/account/logs, then return empty array")
         void shouldReturnEmptyAccountAuditLogs() throws Exception {
             // When
             var result = mockMvc.perform(get(AUDIT_BASE_URL + "/account/logs"));
@@ -500,7 +549,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(2)
-        @DisplayName("5.2 Given account created, when GET /audit/account/logs, then return CREATE/SUCCESS entry")
+        @DisplayName("6.2 Given account created, when GET /audit/account/logs, then return CREATE/SUCCESS entry")
         void shouldReturnAuditLogsAfterAccountCreation() throws Exception {
             // Given
             createAccountViaApi(testData.get("account1"));
@@ -517,7 +566,7 @@ class MyBankMoneyTransferTests {
 
         @Test
         @Order(3)
-        @DisplayName("5.3 Given multiple accounts, when GET /audit/account/{id}/logs, then return only matching account's logs")
+        @DisplayName("6.3 Given multiple accounts, when GET /audit/account/{id}/logs, then return only matching account's logs")
         void shouldReturnAuditLogsByAccountId() throws Exception {
             // Given
             createAccountViaApi(testData.get("account1"));
@@ -537,12 +586,12 @@ class MyBankMoneyTransferTests {
     // ───────────────────────────────────────────────────────────────
 
     @Nested
-    @Order(6)
-    @DisplayName("6. Transaction Audit Logs")
+    @Order(7)
+    @DisplayName("7. Transaction Audit Logs")
     class TransactionAuditLogs {
 
         @Test
-        @DisplayName("6.1 Given successful fund transfer, when GET /audit/transaction/logs, then return SUCCESS entry with correct accounts")
+        @DisplayName("7.1 Given successful fund transfer, when GET /audit/transaction/logs, then return SUCCESS entry with correct accounts")
         void shouldReturnTransactionLogsAfterTransfer() throws Exception {
             // Given
             createAccountViaApi(testData.get("account1"));
