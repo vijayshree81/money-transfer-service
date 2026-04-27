@@ -91,9 +91,12 @@ public class MoneyTransactionService {
 
 	public BigDecimal checkBalance(String accountId) throws ApplicationException {
 		try {
-			var url = retrieveAccountBalanceUrl.replace("{accountId}", accountId);
-			log.info("checking balance from {}", url);
-			var balanceCheckResult = restTemplate.getForEntity(url, BalanceResult.class);
+			log.info("checking balance from {}", retrieveAccountBalanceUrl);
+			var headers = new org.springframework.http.HttpHeaders();
+			headers.set("accountId", accountId);
+			var requestEntity = new org.springframework.http.HttpEntity<>(headers);
+			var balanceCheckResult = restTemplate.exchange(
+					retrieveAccountBalanceUrl, org.springframework.http.HttpMethod.GET, requestEntity, BalanceResult.class);
 			if (balanceCheckResult.getStatusCode().is2xxSuccessful() && balanceCheckResult.hasBody()) {
 				return balanceCheckResult.getBody().finalBalance();
 			}

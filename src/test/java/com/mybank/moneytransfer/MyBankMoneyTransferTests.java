@@ -331,7 +331,7 @@ class MyBankMoneyTransferTests {
             var amtTransfer = new BigDecimal("500");
             var balanceResultMock = new BalanceResult(acct1.getAccountId(), acct1.getBalance(), acct1.getBalance().subtract(amtTransfer));
             mockServer.expect(ExpectedCount.between(0, 10),
-                    requestTo(new URI("http://localhost:8080/mybank/v1/account/323434322/balance")))
+                    requestTo(new URI("http://localhost:8080/mybank/v1/account/balance")))
                     .andExpect(method(HttpMethod.GET))
                     .andRespond(withStatus(HttpStatus.OK)
                             .contentType(MediaType.APPLICATION_JSON)
