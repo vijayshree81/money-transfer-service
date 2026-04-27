@@ -19,7 +19,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 	Optional<Account> findByAccountId(String accountId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Transactional
 	@Query("FROM Account where accountId=:accountId")
 	Optional<Account> getAccountForUpdate(String accountId);
 }
