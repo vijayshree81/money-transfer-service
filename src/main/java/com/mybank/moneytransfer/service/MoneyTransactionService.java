@@ -3,6 +3,7 @@ package com.mybank.moneytransfer.service;
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 
+import com.mybank.moneytransfer.error.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,10 +43,10 @@ public class MoneyTransactionService {
 
 	@Transactional
 	public FundTransferLog transferMoney(TransferRequest transfer, String transactionId)
-			throws OverDraftException, AccountNotFoundException {
+			throws  OverDraftException, AccountNotFoundException {
 		// Prevent same-account transfer
 		if (transfer.accountFromId().equals(transfer.accountToId())) {
-			throw new OverDraftException("Source and destination accounts must be different");
+			throw new BusinessException("Source and destination accounts must be different");
 		}
 
 		// Lock accounts in sorted order to prevent deadlock

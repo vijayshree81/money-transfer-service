@@ -21,6 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Optional;
 
+import com.mybank.moneytransfer.error.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.ClassOrderer;
 import org.junit.jupiter.api.DisplayName;
@@ -414,7 +415,7 @@ class MyBankMoneyTransferTests {
 
             // When / Then
             thenThrownBy(() -> moneyTxnService.transferMoney(transRequest, "TXN-TEST-002"))
-                    .isInstanceOf(OverDraftException.class)
+                    .isInstanceOf(BusinessException.class)
                     .hasMessage("Source and destination accounts must be different");
         }
 
